@@ -158,7 +158,7 @@ jar {
 
 shadowJar {
     configurations = [project.configurations.shadow]
-    archiveName = 'BetterHardcore-1.16.5-1.0.4.jar'
+    archiveName = 'BetterHardcore-1.16.5-1.0.1-ALPHA.jar'
 
 
     exclude "**/module-info.class"
