@@ -17,10 +17,11 @@ public class DynamaxListener {
     @SubscribeEvent
     public void onDynamax (DynamaxEvent.BattleEvolve event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         ServerPlayerEntity player = event.pw.getPlayerOwner();
         if (player != null) {
 
-            Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+            Account account = AccountHandler.getPlayerAccount(player);
             if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
             Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

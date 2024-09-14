@@ -19,6 +19,7 @@ import net.minecraft.world.BossInfo;
 import net.minecraft.world.server.ServerBossInfo;
 import net.minecraftforge.common.MinecraftForge;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.checkerframework.checker.units.qual.A;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -32,8 +33,9 @@ public class AccountHandler {
     public static void whiteOut (ServerPlayerEntity player, String reason) throws ObjectMappingException {
 
         PlayerPartyStorage storage = StorageProxy.getParty(player);
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        Account account = AccountHandler.getPlayerAccount(player);
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());
+        BetterHardcore.logger.info("Detecting a whiteout from " + player.getName().getString() + " for reason: " + reason + " under difficulty " + difficulty.getName());
 
         PlayerWhiteOutEvent whiteOutEvent = new PlayerWhiteOutEvent(player);
         MinecraftForge.EVENT_BUS.post(whiteOutEvent);
@@ -70,40 +72,51 @@ public class AccountHandler {
                 player.inventory.clear();
 
             }
-            for (int i = 0; i < 6; i++) {
-
-                storage.set(i, null);
-
-            }
 
             account.setWhiteouts(account.getWhiteouts() + 1);
             account.setDaysSurvived(0);
             account.setSecondsSurvived(0);
-            // Remove all Pokemon and try to pull from PC
-            // If nothing in PC, give them new starter
-            PCStorage pc = StorageProxy.getPCForPlayer(player);
-            Pokemon[] storedPokemon = pc.getAll();
-            Pokemon firstPokemon = null;
-            for (Pokemon p : storedPokemon) {
 
-                if (p != null) {
+            BetterHardcore.logger.info("Checking if difficulty " + difficulty.getName() + " has Nuzlocke mode enabled...");
+            if (difficulty.isNuzlockeMode()) {
 
-                    firstPokemon = p;
-                    break;
+                for (int i = 0; i < 6; i++) {
+
+                    storage.set(i, null);
+
+                }
+                BetterHardcore.logger.info("Difficulty " + difficulty.getName() + " DOES have Nuzlocke mode enabled, clearing Pokemon");
+                // Remove all Pokemon and try to pull from PC
+                // If nothing in PC, give them new starter
+                PCStorage pc = StorageProxy.getPCForPlayer(player);
+                Pokemon[] storedPokemon = pc.getAll();
+                Pokemon firstPokemon = null;
+                for (Pokemon p : storedPokemon) {
+
+                    if (p != null) {
+
+                        firstPokemon = p;
+                        break;
+
+                    }
+
+                }
+                if (firstPokemon != null) {
+
+                    int box = pc.getPosition(firstPokemon).box;
+                    int slot = pc.getPosition(firstPokemon).order;
+                    storage.add(firstPokemon);
+                    pc.set(box, slot, null);
+
+                } else {
+
+                    RespawnListener.playersRespawningFromBattleDeath.add(player.getUniqueID());
 
                 }
 
-            }
-            if (firstPokemon != null) {
-
-                int box = pc.getPosition(firstPokemon).box;
-                int slot = pc.getPosition(firstPokemon).order;
-                storage.add(firstPokemon);
-                pc.set(box, slot, null);
-
             } else {
 
-                RespawnListener.playersRespawningFromBattleDeath.add(player.getUniqueID());
+                BetterHardcore.logger.info("Difficulty " + difficulty.getName() + " does NOT have Nuzlocke mode enabled, Pokemon should not be touched.");
 
             }
 
@@ -111,31 +124,106 @@ public class AccountHandler {
 
     }
 
-    public static Account getPlayerAccount (UUID uuid) throws ObjectMappingException {
+    public static Account getPlayerAccount (ServerPlayerEntity player) throws ObjectMappingException {
 
+        UUID uuid = player.getUniqueID();
         Account account = accountMap.getOrDefault(uuid, null);
         if (account == null) {
 
-            int catchingLevel = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Catching-Level").getInt();
+            /*int catchingLevel = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Catching-Level").getInt();
             boolean counterDisplayed = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Counter-Displayed").getBoolean();
             int daysSurvived = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Days-Survived").getInt();
             String difficulty = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Difficulty").getString();
             int levelingLevel = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Leveling-Level").getInt();
             int secondsSurvived = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Seconds-Survived").getInt();
             ArrayList<String> caughtSpecies = new ArrayList<>(BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Used-Species").getList(TypeToken.of(String.class)));
-            int whiteouts = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Whiteouts").getInt();
+            int whiteouts = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Whiteouts").getInt();*/
+            int catchingLevel = 0;
+            try {
+
+                catchingLevel = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Catching-Level").getInt();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get catching level from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            boolean counterDisplayed = false;
+            try {
+
+                counterDisplayed = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Counter-Displayed").getBoolean();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get counterDisplayed boolean from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            int daysSurvived = 1;
+            try {
+
+                daysSurvived = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Days-Survived").getInt();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get daysSurvived int from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            String difficulty = ConfigGetters.forceDifficulty.equalsIgnoreCase("none") ? "none" : ConfigGetters.forceDifficulty;
+            try {
+
+                difficulty = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Difficulty").getString();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get difficulty from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            int levelingLevel = 0;
+            try {
+
+                levelingLevel = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Leveling-Level").getInt();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get leveling level from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            int secondsSurvived = 0;
+            try {
+
+                secondsSurvived = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Seconds-Survived").getInt();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get secondsSurvived int from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            ArrayList<String> caughtSpecies = new ArrayList<>();
+            try {
+
+                caughtSpecies = new ArrayList<>(BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Used-Species").getList(TypeToken.of(String.class)));
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get usedSpecies array list from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
+            int whiteouts = 0;
+            try {
+
+                whiteouts = BetterHardcore.playerConfigManager.getPlayerConfigNode(uuid, "Whiteouts").getInt();
+
+            } catch (NullPointerException e) {
+
+                BetterHardcore.logger.error("Couldn't get whiteouts int from account config file for " + uuid + " / " + player.getName().getString());
+
+            }
             account = new Account(uuid, catchingLevel, counterDisplayed, daysSurvived, difficulty, levelingLevel, secondsSurvived, caughtSpecies, whiteouts);
             account.create();
 
         }
 
         return account;
-
-    }
-
-    public static Account getPlayerAccount (ServerPlayerEntity player) throws ObjectMappingException {
-
-        return getPlayerAccount(player.getUniqueID());
 
     }
 

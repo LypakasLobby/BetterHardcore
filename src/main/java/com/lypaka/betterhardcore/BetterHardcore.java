@@ -84,7 +84,7 @@ public class BetterHardcore {
         playerConfigManager.init();
         ConfigGetters.load();
         DifficultyHandler.registerDifficulties();
-        AccountHandler.startTrackerTask();
+        //AccountHandler.startTrackerTask();
 
     }
 

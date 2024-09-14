@@ -1,5 +1,6 @@
 package com.lypaka.betterhardcore.Listeners;
 
+import com.lypaka.betterhardcore.ConfigGetters;
 import com.lypaka.betterhardcore.Difficulties.Difficulty;
 import com.lypaka.betterhardcore.Difficulties.DifficultyHandler;
 import com.lypaka.betterhardcore.PlayerAccounts.Account;
@@ -17,12 +18,13 @@ public class TeraListeners {
     @SubscribeEvent
     public void onTeraStab (TeraAttackSTABEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getUserOwner() instanceof PlayerParticipant) {
 
             ServerPlayerEntity player = ((PlayerParticipant) event.getUserOwner()).player;
             if (player != null) {
 
-                Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+                Account account = AccountHandler.getPlayerAccount(player);
                 if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
                 Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());
@@ -37,12 +39,13 @@ public class TeraListeners {
     @SubscribeEvent
     public void onTeraTypeEffectiveness (TeraAttackEffectivenessEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getUserOwner() instanceof PlayerParticipant) {
 
             ServerPlayerEntity player = ((PlayerParticipant) event.getUserOwner()).player;
             if (player != null) {
 
-                Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+                Account account = AccountHandler.getPlayerAccount(player);
                 if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
                 Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());
@@ -57,10 +60,11 @@ public class TeraListeners {
     @SubscribeEvent
     public void onTera (TerastallizeEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         ServerPlayerEntity player = event.getPlayer();
         if (player != null) {
 
-            Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+            Account account = AccountHandler.getPlayerAccount(player);
             if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
             Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

@@ -12,6 +12,7 @@ import com.pixelmonmod.pixelmon.entities.npcs.NPCNurseJoy;
 import com.pixelmonmod.pixelmon.entities.npcs.NPCShopkeeper;
 import com.pixelmonmod.pixelmon.entities.npcs.NPCTrader;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
@@ -20,8 +21,9 @@ public class NPCInteractListener {
     @SubscribeEvent
     public void onNPCInteract (NPCEvent.Interact event) throws ObjectMappingException {
 
-        PlayerEntity player = event.player;
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        if (ConfigGetters.gcesMode) return;
+        ServerPlayerEntity player = (ServerPlayerEntity) event.player;
+        Account account = AccountHandler.getPlayerAccount(player);
         if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

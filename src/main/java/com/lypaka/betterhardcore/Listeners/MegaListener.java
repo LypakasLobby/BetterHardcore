@@ -17,9 +17,10 @@ public class MegaListener {
     @SubscribeEvent
     public void onMega (MegaEvolutionEvent.Battle event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getPlayer() == null) return;
         ServerPlayerEntity player = event.getPlayer();
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        Account account = AccountHandler.getPlayerAccount(player);
         if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

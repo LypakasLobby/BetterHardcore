@@ -16,6 +16,7 @@ public class HeldItemListener {
     @SubscribeEvent
     public void onHeldItemChange (HeldItemChangedEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.pokemon.getOwnerPlayer() == null) return;
 
         // I can't believe I have to put this here
@@ -25,7 +26,7 @@ public class HeldItemListener {
 
         ServerPlayerEntity player = event.player;
         if (!AccountHandler.accountMap.containsKey(player.getUniqueID())) return;
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        Account account = AccountHandler.getPlayerAccount(player);
         if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

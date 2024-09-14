@@ -1,5 +1,6 @@
 package com.lypaka.betterhardcore.Listeners;
 
+import com.lypaka.betterhardcore.ConfigGetters;
 import com.lypaka.betterhardcore.PlayerAccounts.Account;
 import com.lypaka.betterhardcore.PlayerAccounts.AccountHandler;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -12,10 +13,11 @@ public class PlayerDeathListener {
     @SubscribeEvent
     public void onDeath (LivingDeathEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getEntityLiving() instanceof ServerPlayerEntity) {
 
             ServerPlayerEntity player = (ServerPlayerEntity) event.getEntityLiving();
-            Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+            Account account = AccountHandler.getPlayerAccount(player);
             if (!account.getDifficulty().equalsIgnoreCase("none")) {
 
                 AccountHandler.whiteOut(player, "player death");

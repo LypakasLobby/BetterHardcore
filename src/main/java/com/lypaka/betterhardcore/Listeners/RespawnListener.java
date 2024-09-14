@@ -1,5 +1,6 @@
 package com.lypaka.betterhardcore.Listeners;
 
+import com.lypaka.betterhardcore.ConfigGetters;
 import com.lypaka.betterhardcore.Difficulties.Difficulty;
 import com.lypaka.betterhardcore.Difficulties.DifficultyHandler;
 import com.lypaka.betterhardcore.PlayerAccounts.Account;
@@ -23,8 +24,9 @@ public class RespawnListener {
     @SubscribeEvent
     public void onRespawn (PlayerEvent.PlayerRespawnEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        Account account = AccountHandler.getPlayerAccount(player);
         if (!account.getDifficulty().equalsIgnoreCase("none")) {
 
             Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

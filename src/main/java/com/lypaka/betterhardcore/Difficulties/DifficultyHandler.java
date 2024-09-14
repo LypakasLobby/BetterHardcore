@@ -84,8 +84,20 @@ public class DifficultyHandler {
             CatchingModule catchingModule = new CatchingModule(enableCatching, finalStagePermission, firstStagePermission, middleStagePermission, singleStagePermission, legendaryPermission, shinyPermission, tierMap);
 
             boolean enableLeveling = bcm.getConfigNode(3, "Enabled").getBoolean();
+            boolean obedient = true;
+            if (bcm.getConfigNode(3, "Obedience").isVirtual()) {
+
+                bcm.getConfigNode(3, "Obedience").setValue(true);
+                bcm.getConfigNode(3, "Obedience").setComment("If the player somehow tries to use a Pokemon that is on a higher level than their currently allowed max level, this set to true means the Pokemon will have a chance to be disobedient in battle");
+                bcm.save();
+
+            } else {
+
+                obedient = bcm.getConfigNode(3, "Obedience").getBoolean();
+
+            }
             Map<String, Integer> levelTierMap = bcm.getConfigNode(3, "Tiers").getValue(new TypeToken<Map<String, Integer>>() {});
-            LevelingModule levelingModule = new LevelingModule(enableLeveling, levelTierMap);
+            LevelingModule levelingModule = new LevelingModule(enableLeveling, obedient, levelTierMap);
 
             Difficulty difficulty = new Difficulty(s, allowBreeding, allowHealingInBattle, allowHealingOutsideOfBattle, allowHealers, allowHeldItems,
                     allowPokeBallsInBattle, allowMasterParkBalls, allowRareCandies, allowRevives, allowShopkeepers, allowTera, allowTeraBattleMods,

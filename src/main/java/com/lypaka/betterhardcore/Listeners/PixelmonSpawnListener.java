@@ -1,5 +1,6 @@
 package com.lypaka.betterhardcore.Listeners;
 
+import com.lypaka.betterhardcore.ConfigGetters;
 import com.lypaka.betterhardcore.PlayerAccounts.Account;
 import com.lypaka.betterhardcore.PlayerAccounts.AccountHandler;
 import com.pixelmonmod.pixelmon.api.events.spawning.SpawnEvent;
@@ -14,12 +15,13 @@ public class PixelmonSpawnListener {
     @SubscribeEvent
     public void onSpawn (SpawnEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.action.getOrCreateEntity() instanceof PixelmonEntity) {
 
             if (event.spawner instanceof PlayerTrackingSpawner) {
 
                 ServerPlayerEntity player = ((PlayerTrackingSpawner) event.spawner).getTrackedPlayer();
-                Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+                Account account = AccountHandler.getPlayerAccount(player);
                 if (!account.getDifficulty().equalsIgnoreCase("none")) {
 
                     PixelmonEntity pokemon = (PixelmonEntity) event.action.getOrCreateEntity();

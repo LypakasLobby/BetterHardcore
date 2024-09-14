@@ -1,6 +1,11 @@
 package com.lypaka.betterhardcore.Listeners;
 
+import com.lypaka.betterhardcore.ConfigGetters;
+import com.lypaka.betterhardcore.Difficulties.Difficulty;
+import com.lypaka.betterhardcore.Difficulties.DifficultyHandler;
+import com.lypaka.betterhardcore.PlayerAccounts.Account;
 import com.lypaka.betterhardcore.PlayerAccounts.AccountHandler;
+import com.pixelmonmod.pixelmon.api.config.BetterSpawnerConfig;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
 import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
@@ -16,6 +21,7 @@ public class PixelmonFaintListener {
     @SubscribeEvent
     public void onPokemonDeath (LivingDeathEvent event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getEntity() instanceof PixelmonEntity) {
 
             PixelmonEntity pixelmon = (PixelmonEntity) event.getEntity();
@@ -25,27 +31,37 @@ public class PixelmonFaintListener {
                 if (pixelmon.getOwner() instanceof ServerPlayerEntity) {
 
                     ServerPlayerEntity player = pixelmon.getPokemon().getOwnerPlayer();
-                    if (BattleRegistry.getBattle(player) == null) { // don't want to be calling this from battles, there's already a listener for that
+                    Account account = AccountHandler.getPlayerAccount(player);
+                    if (!account.getDifficulty().equalsIgnoreCase("none")) {
 
-                        PlayerPartyStorage storage = StorageProxy.getParty(player);
-                        for (int i = 0; i < 6; i++) {
+                        Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());
+                        if (difficulty.isNuzlockeMode()) {
 
-                            Pokemon p = storage.get(i);
-                            if (p != null) {
+                            if (BattleRegistry.getBattle(player) == null) { // don't want to be calling this from battles, there's already a listener for that
 
-                                if (p == pokemon) {
+                                PlayerPartyStorage storage = StorageProxy.getParty(player);
+                                for (int i = 0; i < 6; i++) {
 
-                                    storage.set(i, null);
+                                    Pokemon p = storage.get(i);
+                                    if (p != null) {
+
+                                        if (p == pokemon) {
+
+                                            storage.set(i, null);
+
+                                        }
+
+                                    }
+
+                                }
+
+                                if (storage.getFirstAblePokemon() == null) {
+
+                                    AccountHandler.whiteOut(player, "pixelmon fainted");
 
                                 }
 
                             }
-
-                        }
-
-                        if (storage.getFirstAblePokemon() == null) {
-
-                            AccountHandler.whiteOut(player, "pixelmon fainted");
 
                         }
 

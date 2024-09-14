@@ -7,16 +7,11 @@ import com.lypaka.betterhardcore.PlayerAccounts.Account;
 import com.lypaka.betterhardcore.PlayerAccounts.AccountHandler;
 import com.lypaka.lypakautils.FancyText;
 import com.lypaka.lypakautils.MiscHandlers.LogicalPixelmonMoneyHandler;
-import com.pixelmonmod.pixelmon.entities.npcs.NPCNurseJoy;
-import com.pixelmonmod.pixelmon.entities.npcs.NPCShopkeeper;
-import com.pixelmonmod.pixelmon.entities.npcs.NPCTrader;
 import com.pixelmonmod.pixelmon.entities.pixelmon.PixelmonEntity;
-import com.pixelmonmod.pixelmon.items.ExpCandyItem;
 import com.pixelmonmod.pixelmon.items.PokeBallItem;
 import com.pixelmonmod.pixelmon.items.ReviveItem;
 import com.pixelmonmod.pixelmon.items.TechnicalMoveItem;
 import com.pixelmonmod.pixelmon.items.medicine.MedicineItem;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -32,11 +27,12 @@ public class InteractionListeners {
     @SubscribeEvent
     public void onBlockInteract (PlayerInteractEvent.RightClickBlock event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getHand() != Hand.MAIN_HAND) return;
         if (event.getSide() == LogicalSide.CLIENT) return;
 
-        PlayerEntity player = event.getPlayer();
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+        Account account = AccountHandler.getPlayerAccount(player);
         if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());
@@ -90,11 +86,12 @@ public class InteractionListeners {
     @SubscribeEvent
     public void onEntityInteract (PlayerInteractEvent.EntityInteract event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getHand() != Hand.MAIN_HAND) return;
         if (event.getSide() == LogicalSide.CLIENT) return;
 
-        PlayerEntity player = event.getPlayer();
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+        Account account = AccountHandler.getPlayerAccount(player);
         if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());
@@ -119,25 +116,6 @@ public class InteractionListeners {
 
                         }
 
-                    } else if (item.getItem() instanceof ExpCandyItem) {
-
-                        String id = item.getItem().getRegistryName().toString();
-                        if (id.equalsIgnoreCase("pixelmon:rare_candy")) {
-
-                            if (!difficulty.doesAllowRareCandies()) {
-
-                                event.setCanceled(true);
-                                player.sendMessage(FancyText.getFormattedText(ConfigGetters.messages.get("Item-Clause")), player.getUniqueID());
-
-                            }
-
-                        } else if (!difficulty.doesAllowXPCandies()) {
-
-                            event.setCanceled(true);
-                            player.sendMessage(FancyText.getFormattedText(ConfigGetters.messages.get("Item-Clause")), player.getUniqueID());
-
-                        }
-
                     }
 
                 }
@@ -151,11 +129,12 @@ public class InteractionListeners {
     @SubscribeEvent
     public void onItemInteract (PlayerInteractEvent.RightClickItem event) throws ObjectMappingException {
 
+        if (ConfigGetters.gcesMode) return;
         if (event.getHand() != Hand.MAIN_HAND) return;
         if (event.getSide() == LogicalSide.CLIENT) return;
 
-        PlayerEntity player = event.getPlayer();
-        Account account = AccountHandler.getPlayerAccount(player.getUniqueID());
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+        Account account = AccountHandler.getPlayerAccount(player);
         if (account.getDifficulty().equalsIgnoreCase("none")) return;
 
         Difficulty difficulty = DifficultyHandler.getFromName(account.getDifficulty());

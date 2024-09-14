@@ -59,7 +59,7 @@ public class AssignCommand {
 
                                                                                     try {
 
-                                                                                        Account account = AccountHandler.getPlayerAccount(target.getUniqueID());
+                                                                                        Account account = AccountHandler.getPlayerAccount(target);
                                                                                         DifficultyHandler.assignDifficulty(account, difficulty);
                                                                                         c.getSource().sendFeedback(FancyText.getFormattedText("&aSuccessfully assigned the " + difficulty.getName() + " Difficulty to " + target.getName().getString()), true);
                                                                                         return 1;

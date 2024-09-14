@@ -19,6 +19,7 @@ public class BetterHardcoreCommand {
 
         new AssignCommand(event.getDispatcher());
         new ReloadCommand(event.getDispatcher());
+        new SetCommand(event.getDispatcher());
         new ToggleCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());

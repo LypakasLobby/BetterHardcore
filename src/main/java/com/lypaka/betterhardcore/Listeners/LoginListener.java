@@ -64,9 +64,10 @@ public class LoginListener {
     @SubscribeEvent
     public void onLogout (PlayerEvent.PlayerLoggedOutEvent event) throws ObjectMappingException {
 
-        Account account = AccountHandler.getPlayerAccount(event.getPlayer().getUniqueID());
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+        Account account = AccountHandler.getPlayerAccount(player);
         account.saveWholeAccount();
-        AccountHandler.accountMap.entrySet().removeIf(e -> e.getKey().toString().equalsIgnoreCase(event.getPlayer().getUniqueID().toString()));
+        AccountHandler.accountMap.entrySet().removeIf(e -> e.getKey().toString().equalsIgnoreCase(player.getUniqueID().toString()));
 
     }
 
